@@ -36,12 +36,19 @@ for SRC in $SOURCES; do
     INC="$(includes $SRC)"
     echo >> ${CONFIG_MK}
     echo "$SRC_O: $SRC $INC" >> ${CONFIG_MK}
-    echo "\t${LIBTOOL} --tag=CC --mode=compile \${CC} \${CPPFLAGS} \${CFLAGS} -c $SRC -o $SRC_O" >> ${CONFIG_MK}
+    if [[ $APPLE_LIBTOOL = Yes ]]; then
+        echo "\t\${CC} \${CPPFLAGS} \${CFLAGS} -c $SRC -o $SRC_O" >> ${CONFIG_MK}
+    else
+        echo "\t${LIBTOOL} --tag=CC --mode=compile \${CC} \${CPPFLAGS} \${CFLAGS} -c $SRC -o $SRC_O" >> ${CONFIG_MK}
+    fi
 done
 
 echo >> ${CONFIG_MK}
 echo "$LIB: $OBJECTS" >> ${CONFIG_MK}
-echo "\t${LIBTOOL} --tag=CC --mode=link \${CC} \${LDFLAGS} $OBJECTS -o $LIB -rpath ${LIBDIR}" >> ${CONFIG_MK}
-
+if [[ $APPLE_LIBTOOL = Yes ]]; then
+    echo "\t${LIBTOOL} -dynamic -o $LIB \${CC} \${LDFLAGS} $OBJECTS" >> ${CONFIG_MK}
+else
+    echo "\t${LIBTOOL} --tag=CC --mode=link \${CC} \${LDFLAGS} $OBJECTS -o $LIB -rpath ${LIBDIR}" >> ${CONFIG_MK}
+fi
 (cd tests && ./configure)
 (cd benchmark && ./configure)

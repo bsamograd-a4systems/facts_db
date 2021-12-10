@@ -28,7 +28,10 @@ if test -z "$CC"; then
 fi
 echo "CC = $CC" >> ${CONFIG_MK}
 
-if test -x /usr/local/bin/libtool; then
+if libtool -V | grep -q Apple; then
+    APPLE_LIBTOOL=Yes
+    LIBTOOL=libtool
+elif test -x /usr/local/bin/libtool; then
     LIBTOOL=/usr/local/bin/libtool
 else
     LIBTOOL=libtool
